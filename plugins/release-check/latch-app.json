@@ -1,0 +1,40 @@
+{
+  "formatVersion": 2,
+  "id": "release-check",
+  "name": "发布检查",
+  "version": "1.0.0",
+  "description": "按项目的清单开一个检查会话，逐项记下结果与意见。",
+  "requires": {
+    "appSdk": "^1"
+  },
+  "apps": [
+    {
+      "id": "main",
+      "title": "发布检查",
+      "icon": "list-checks",
+      "entry": "src/index.tsx",
+      "dataVersion": 1,
+      "capabilities": {
+        "tasks.read": true,
+        "tasks.start": {
+          "projects": "any"
+        },
+        "tasks.readOwn": true,
+        "storage": ["plugin", "project"]
+      },
+      "preview": {
+        "tasks": [
+          {
+            "title": "接入每日汇率",
+            "status": "running",
+            "projectName": "ledger-web"
+          },
+          {
+            "title": "修复 CSV 导出的舍入",
+            "status": "idle"
+          }
+        ]
+      }
+    }
+  ]
+}

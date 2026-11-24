@@ -1,0 +1,10 @@
+{
+  "formatVersion": 1,
+  "id": "shift-handoff",
+  "name": "交接清单",
+  "version": "1.0.0",
+  "description": "让 Agent 用已有证据整理进度、未决问题和接手后的第一步。",
+  "skills": [
+    { "id": "handoff", "name": "交接清单", "description": "为下一位接手的人整理已有证据、未完成事项和下一步。", "file": "SKILL.md" }
+  ]
+}

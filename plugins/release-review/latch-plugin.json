@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "id": "release-review",
+  "name": "发布检查",
+  "version": "1.0.0",
+  "description": "把发布清单、检查技能和报告工具放进同一个会话工作流。",
+  "host": ["./host.mjs"],
+  "config": {
+    "checks": ["测试通过并附上结果", "兼容性与迁移已核对", "已准备回退步骤"]
+  },
+  "skills": [
+    {
+      "id": "release-review",
+      "name": "发布检查",
+      "description": "按证据检查发布准备情况，并区分已验证与未验证的项。",
+      "file": "./SKILL.md"
+    }
+  ],
+  "panels": [
+    {
+      "id": "checklist",
+      "title": "发布清单",
+      "description": "整理发布条件，再交给当前会话核对。",
+      "harnessIds": ["standard"],
+      "entry": "./panel.mjs"
+    }
+  ]
+}

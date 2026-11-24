@@ -1,0 +1,82 @@
+.rc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-16);
+  max-width: 680px;
+  margin: 0 auto;
+}
+.rc-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-12);
+}
+.rc-title {
+  flex: 1;
+  min-width: 0;
+}
+.rc-title h2 {
+  margin: 0;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 600;
+}
+.rc-sub {
+  margin: var(--sp-2) 0 0;
+  color: var(--muted);
+}
+.rc-target,
+.rc-summary,
+.rc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-8);
+}
+.rc-grow {
+  flex: 1;
+}
+.rc-muted {
+  color: var(--muted);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.rc-offline {
+  margin: 0;
+  color: var(--amber);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.rc-mono {
+  font-family: var(--mono);
+}
+.rc-session {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+.rc-edit {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+}
+@media (max-width: 520px) {
+  .rc-edit {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .rc-edit > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+.rc-reply {
+  margin: 0;
+  padding: var(--sp-12);
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-mono);
+}
