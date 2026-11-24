@@ -751,7 +751,8 @@ function Outcome(props: {
   if (failed)
     return (
       <ui.Notice tone="error" title="检查没有完成" action={open}>
-        检查会话{value.outcome === 'cancelled' ? '被取消了' : value.outcome === 'interrupted' ? '中断了' : '失败了'} · {when(value.finishedAt)}
+        检查会话{value.outcome === 'cancelled' ? '被取消了' : value.outcome === 'interrupted' ? '中断了' : '失败了'} ·{' '}
+        {when(value.finishedAt)}
       </ui.Notice>
     )
   return (
