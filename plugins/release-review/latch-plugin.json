@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "id": "release-review",
-  "name": "发布检查",
-  "version": "1.0.0",
+  "name": "发布清单面板",
+  "version": "1.0.1",
   "description": "把发布清单、检查技能和报告工具放进同一个会话工作流。",
   "host": ["./host.mjs"],
   "config": {

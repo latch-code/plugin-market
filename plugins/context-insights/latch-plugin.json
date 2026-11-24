@@ -2,13 +2,13 @@
   "formatVersion": 1,
   "id": "context-insights",
   "name": "上下文",
-  "version": "1.0.0",
-  "description": "查看模型请求的组成、会话的上下文窗口占用和工具调用统计。",
+  "version": "1.1.0",
+  "description": "查看模型请求的组成、上下文窗口占用与压缩记录。",
   "panels": [
     {
       "id": "insights",
       "title": "上下文",
-      "description": "查看请求组成、窗口用量和工具调用，定位到对应的对话回合。",
+      "description": "比较窗口用量与请求组成，定位到对应的对话轮次或工具输出。",
       "entry": "./panel.mjs",
       "context": true
     }
