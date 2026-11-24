@@ -53,6 +53,7 @@ export default function ReleaseChecklist({ react, ui, session, canCompose, compo
       label: '发布说明',
       placeholder: '版本、检查结果或仍需确认的事项',
       rows: 4,
+      maxLength: 4000,
       value: notes,
       onChange: event => setNotes(event.target.value),
     }),

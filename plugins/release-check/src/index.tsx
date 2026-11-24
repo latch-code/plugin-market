@@ -103,6 +103,10 @@ function Page({ latch, ui }: PageProps) {
   const [projectChoice, setProjectChoice] = useState(saved.current.projectId)
   const project = projects.find(item => item.id === projectChoice)
     ?? projects[0] ?? { id: projectChoice ?? 'default', name: projectChoice ?? 'default' }
+  // The picker shows the four most recent projects; a chosen older one takes the last place so it still shows as selected.
+  const recentProjects = projects.slice(0, 4)
+  const projectOptions =
+    recentProjects.includes(project) || !projects.includes(project) ? recentProjects : [...recentProjects.slice(0, 3), project]
   const harnesses = useMemo(() => {
     const ids: string[] = []
     const ordered = [...(tasks ?? []).filter(task => task.projectId === project.id), ...(tasks ?? [])]
@@ -425,7 +429,7 @@ function Page({ latch, ui }: PageProps) {
           <ui.Segmented
             label="项目"
             value={project.id}
-            options={projects.slice(0, 4).map(item => ({ value: item.id, label: item.name }))}
+            options={projectOptions.map(item => ({ value: item.id, label: item.name }))}
             onChange={choose}
             disabled={busy || editing}
           />
@@ -747,7 +751,7 @@ function Outcome(props: {
   if (failed)
     return (
       <ui.Notice tone="error" title="检查没有完成" action={open}>
-        检查会话{value.outcome === 'cancelled' ? '被取消了' : '失败了'} · {when(value.finishedAt)}
+        检查会话{value.outcome === 'cancelled' ? '被取消了' : value.outcome === 'interrupted' ? '中断了' : '失败了'} · {when(value.finishedAt)}
       </ui.Notice>
     )
   return (

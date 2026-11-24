@@ -1,8 +1,8 @@
 {
   "formatVersion": 2,
   "id": "release-check",
-  "name": "发布检查",
-  "version": "1.0.0",
+  "name": "发布检查记录",
+  "version": "1.0.1",
   "description": "按项目的清单开一个检查会话，逐项记下结果与意见。",
   "requires": {
     "appSdk": "^1"

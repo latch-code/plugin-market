@@ -9,8 +9,8 @@
 | 插件 | 标识 | 版本 | 类型 | 用途 | 可以访问什么 |
 | --- | --- | --- | --- | --- | --- |
 | [交接清单](plugins/shift-handoff/) | `shift-handoff` | 1.0.0 | 技能 | 把对话整理成交接说明：下一步、已完成工作的证据、待确认的问题。 | 只有文本。一份交给所选 Agent 读取的技能文件，不含代码。 |
-| [发布清单面板](plugins/release-review/) | `release-review` | 1.0.0 | 会话面板 · 工具 · 技能 | 在内置 Agent 会话旁勾选发布条件，写入草稿交给 Agent 核对。工具只汇总传入的清单，不做核实。 | 可信本机代码：以 Host 权限运行的 Host 模块，以及与工作台页面同权的 React 面板。应用前需在 Mac 上确认。 |
-| [发布检查记录](plugins/release-check/) | `release-check` | 1.0.0 | 应用页面 | 在新会话中为项目发起发布检查，留存每项的结果、证据和备注。 | 隔离页面，能力为 `tasks.read`、任意项目的 `tasks.start`、`tasks.readOwn` 和 `storage`（plugin、project）。它开始的会话使用项目默认权限。授予这些能力需在 Mac 上确认。 |
+| [发布清单面板](plugins/release-review/) | `release-review` | 1.0.1 | 会话面板 · 工具 · 技能 | 在内置 Agent 会话旁勾选发布条件，写入草稿交给 Agent 核对。工具只汇总传入的清单，不做核实。 | 可信本机代码：以 Host 权限运行的 Host 模块，以及与工作台页面同权的 React 面板。应用前需在 Mac 上确认。 |
+| [发布检查记录](plugins/release-check/) | `release-check` | 1.0.1 | 应用页面 | 在新会话中为项目发起发布检查，留存每项的结果、证据和备注。 | 隔离页面，能力为 `tasks.read`、任意项目的 `tasks.start`、`tasks.readOwn` 和 `storage`（plugin、project）。它开始的会话使用项目默认权限。授予这些能力需在 Mac 上确认。 |
 | [上下文](plugins/context-insights/) | `context-insights` | 1.1.0 | 会话面板 | 比较请求组成和逐轮上下文窗口用量，跳回造成变化的轮次或工具输出。 | 与工作台页面同权的可信 React 面板。读取工作台提供的当前会话上下文统计与回合跳转。应用前需在 Mac 上确认。 |
 
 ## 安装
