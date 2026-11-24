@@ -67,5 +67,28 @@
       "agent": "Starts a check in a new session with project defaults and keeps the reply from that session.",
       "access": "An isolated page can list permitted session summaries, start sessions, read its own replies and use plugin and project storage. Grant new page capabilities on the host Mac."
     }
+  },
+  {
+    "id": "context-insights",
+    "folder": "context-insights",
+    "manifest": "latch-plugin.json",
+    "files": ["panel.mjs"],
+    "facets": ["panel"],
+    "zh": {
+      "name": "上下文",
+      "kind": "会话面板",
+      "summary": "检查模型请求的组成、token 用量和工具调用，定位到对应的对话回合。",
+      "use": "安装后，在会话右栏点「＋」，打开「上下文」。内置 Agent 可查看逐请求组成，其他 Harness 显示它们报告的窗口用量和工具统计。",
+      "agent": "供你查看会话统计，Agent 无需执行额外步骤。",
+      "access": "面板与工作台页面同权。上下文接口提供当前会话的只读统计和回合跳转。首次应用这份代码需在 Mac 确认。"
+    },
+    "en": {
+      "name": "Context",
+      "kind": "Session panel",
+      "summary": "Inspect model request composition, token usage and tool calls, then jump to the matching chat turn.",
+      "use": "After installing, choose + in the session sidebar and open Context. The built-in agent shows per-request composition. Other Harnesses show reported window usage and tool activity.",
+      "agent": "Shows you session statistics without requiring extra work from the agent.",
+      "access": "The panel runs with workbench page permissions. The context interface provides read-only statistics and turn navigation for the current session. Confirm this code on the host Mac before applying it."
+    }
   }
 ]

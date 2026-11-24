@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "id": "context-insights",
+  "name": "上下文",
+  "version": "1.0.0",
+  "description": "查看模型请求的组成、会话的上下文窗口占用和工具调用统计。",
+  "panels": [
+    {
+      "id": "insights",
+      "title": "上下文",
+      "description": "查看请求组成、窗口用量和工具调用，定位到对应的对话回合。",
+      "entry": "./panel.mjs",
+      "context": true
+    }
+  ]
+}
