@@ -3,7 +3,7 @@ const copy = {
     unavailable: '当前版本无法提供上下文统计，请更新 Latch。',
     trend: '上下文演变',
     composition: '请求组成',
-    textInput: '输入文本',
+    textInput: '输入文本 · UTF-8',
     detail: '请求明细',
     instructions: '指令',
     skills: '技能',
@@ -35,7 +35,6 @@ const copy = {
     grew: (name, size) => `${name}增加 ${size}`,
     shrank: (name, size) => `${name}减少 ${size}`,
     unchanged: '各来源文本大小与上次相同',
-    redistributed: '文本总量与上次相同，来源占比已变化',
     first: '首次记录',
     reset: '重新开始上下文',
     running: '进行中',
@@ -44,6 +43,82 @@ const copy = {
     interrupted: '已中断',
     partial: n => `${n} 个工具定义未计入文本大小。`,
     callsRequested: n => `请求了 ${n} 次工具调用`,
+    biggest: '此时占得最多',
+    growth: '较上次增长最多',
+    reduction: '较上次减少最多',
+    net: size => `净变化 ${size}`,
+    requestTools: '本次请求的工具结果',
+    largest: '最大的工具结果',
+    added: '本次新增结果',
+    additional: '其余新增结果',
+    unnamed: '工具结果',
+    viewTool: name => `查看工具输出：${name}`,
+    inclusion: {
+      new: '本次新增',
+      replayed: '已在上次带入',
+      unknown: '未知何时首次带入',
+    },
+    claude: 'Claude SDK 测量',
+    breakdown: '窗口组成',
+    usedCategories: '已用上下文',
+    classified: value => `已分类 ${value}`,
+    usedTotal: value => `已用 ${value}`,
+    capacityParts: '窗口容量分配',
+    capacityTotal: value => `容量 ${value}`,
+    usedOther: '其他已用上下文',
+    free: '空闲空间',
+    buffer: '压缩预留',
+    deferred: '延迟加载',
+    deferredNote: '未计入窗口占用',
+    messageBreakdown: '其中，消息包含',
+    messageTotal: value => `消息共 ${value}`,
+    unitemized: '未细分',
+    providerUsage: '最近一次模型服务用量',
+    providerSource: '同一次请求，由 Claude SDK 转报',
+    providerInput: '输入 tokens',
+    providerOutput: '输出 tokens',
+    compaction: '上下文压缩',
+    compacted: '已压缩',
+    auto: '自动',
+    manual: '手动',
+    before: '压缩前',
+    after: '压缩后',
+    compactionDuration: '耗时',
+    older: '更早的轮次',
+    latestWindow: '回到最新报告',
+    windowDelta: value => `较上一轮净变化 ${value}`,
+    reportCount: n => `${n} 份报告`,
+    compactionStatus: {
+      in_progress: '进行中',
+      completed: '已完成',
+      failed: '失败',
+      cancelled: '已取消',
+      unknown: '结果未报告',
+    },
+    categories: {
+      system_prompt: '系统提示词',
+      system_tools: '内置工具',
+      mcp_tools: 'MCP 工具',
+      mcp_instructions: 'MCP 指令',
+      mcp_tools_deferred: 'MCP 工具（延迟加载）',
+      system_tools_deferred: '内置工具（延迟加载）',
+      custom_agents: '自定义 Agent',
+      memory_files: '记忆文件',
+      skills: '技能',
+      messages: '消息',
+      autocompact_buffer: '自动压缩预留',
+      compact_buffer: '压缩预留',
+      free_space: '空闲空间',
+    },
+    messageParts: {
+      toolCalls: '工具调用',
+      toolResults: '工具结果',
+      attachments: '附件',
+      assistantMessages: 'Agent 消息',
+      userMessages: '用户消息',
+      redirectedContext: '重定向上下文',
+      unattributed: '未归类',
+    },
     window: '上下文窗口',
     noWindow: 'Harness 尚未报告窗口占用。',
     used: '已用',
@@ -53,9 +128,7 @@ const copy = {
     windowHistory: '逐轮窗口占用',
     usedTokens: '已用 tokens',
     turn: n => `第 ${n} 轮`,
-    reports: '各轮报告',
     recent: '最近一次模型请求',
-    noRequest: '没有可用的请求组成记录。',
     tools: '可用工具',
     messagesCount: n => `${n} 条对话消息`,
     toolsCount: n => `${n} 个可用工具`,
@@ -75,7 +148,7 @@ const copy = {
     unavailable: 'Context statistics require a newer version of Latch. Update Latch to view them.',
     trend: 'Context history',
     composition: 'Request composition',
-    textInput: 'Input text',
+    textInput: 'Input text · UTF-8',
     detail: 'Request details',
     instructions: 'Instructions',
     skills: 'Skills',
@@ -107,7 +180,6 @@ const copy = {
     grew: (name, size) => `${name} grew by ${size}`,
     shrank: (name, size) => `${name} fell by ${size}`,
     unchanged: 'Same text size for every source',
-    redistributed: 'Same total input size, different source shares',
     first: 'First observation',
     reset: 'Fresh context',
     running: 'In progress',
@@ -116,6 +188,82 @@ const copy = {
     interrupted: 'Interrupted',
     partial: (n, count) => `${n} tool ${count === 1 ? 'definition' : 'definitions'} excluded from text size.`,
     callsRequested: (n, count) => `Requested ${n} tool ${count === 1 ? 'call' : 'calls'}`,
+    biggest: 'Largest in this request',
+    growth: 'Biggest growth vs previous',
+    reduction: 'Biggest drop vs previous',
+    net: size => `Net change ${size}`,
+    requestTools: 'Tool results in this request',
+    largest: 'Largest tool results',
+    added: 'New tool results',
+    additional: 'Other new tool results',
+    unnamed: 'Tool result',
+    viewTool: name => `View tool output: ${name}`,
+    inclusion: {
+      new: 'New in this request',
+      replayed: 'Already in previous request',
+      unknown: 'First inclusion unknown',
+    },
+    claude: 'Measured by Claude SDK',
+    breakdown: 'Window breakdown',
+    usedCategories: 'Context in use',
+    classified: value => `Classified ${value}`,
+    usedTotal: value => `Used ${value}`,
+    capacityParts: 'Window capacity allocation',
+    capacityTotal: value => `Capacity ${value}`,
+    usedOther: 'Other context in use',
+    free: 'Free space',
+    buffer: 'Compaction buffer',
+    deferred: 'Deferred',
+    deferredNote: 'Excluded from window usage',
+    messageBreakdown: 'Within messages',
+    messageTotal: value => `Messages total ${value}`,
+    unitemized: 'Not itemized',
+    providerUsage: 'Latest provider usage',
+    providerSource: 'Same request, as reported by the Claude SDK',
+    providerInput: 'Input tokens',
+    providerOutput: 'Output tokens',
+    compaction: 'Context compaction',
+    compacted: 'Compacted',
+    auto: 'Automatic',
+    manual: 'Manual',
+    before: 'Before compaction',
+    after: 'After compaction',
+    compactionDuration: 'Duration',
+    older: 'Earlier turns',
+    latestWindow: 'Return to latest report',
+    windowDelta: value => `Net change from previous turn ${value}`,
+    reportCount: (n, count) => `${n} ${count === 1 ? 'report' : 'reports'}`,
+    compactionStatus: {
+      in_progress: 'In progress',
+      completed: 'Completed',
+      failed: 'Failed',
+      cancelled: 'Cancelled',
+      unknown: 'Outcome not reported',
+    },
+    categories: {
+      system_prompt: 'System prompt',
+      system_tools: 'Built-in tools',
+      mcp_tools: 'MCP tools',
+      mcp_instructions: 'MCP instructions',
+      mcp_tools_deferred: 'MCP tools (deferred)',
+      system_tools_deferred: 'Built-in tools (deferred)',
+      custom_agents: 'Custom agents',
+      memory_files: 'Memory files',
+      skills: 'Skills',
+      messages: 'Messages',
+      autocompact_buffer: 'Automatic compaction buffer',
+      compact_buffer: 'Compaction buffer',
+      free_space: 'Free space',
+    },
+    messageParts: {
+      toolCalls: 'Tool calls',
+      toolResults: 'Tool results',
+      attachments: 'Attachments',
+      assistantMessages: 'Agent messages',
+      userMessages: 'User messages',
+      redirectedContext: 'Redirected context',
+      unattributed: 'Unattributed',
+    },
     window: 'Context window',
     noWindow: 'The Harness has not reported window usage.',
     used: 'Used',
@@ -125,9 +273,7 @@ const copy = {
     windowHistory: 'Window usage by turn',
     usedTokens: 'Tokens in use',
     turn: n => `Turn ${n}`,
-    reports: 'Turn reports',
     recent: 'Latest model request',
-    noRequest: 'No request breakdown is available.',
     tools: 'Available tools',
     messagesCount: (n, count) => `${n} chat ${count === 1 ? 'message' : 'messages'}`,
     toolsCount: (n, count) => `${n} available ${count === 1 ? 'tool' : 'tools'}`,
@@ -159,7 +305,9 @@ const sum = values => values.reduce((total, value) => total + value, 0)
 function formatters(locale) {
   const number = new Intl.NumberFormat(locale)
   const decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 })
-  const percent = new Intl.NumberFormat(locale, { style: 'percent' })
+  const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumSignificantDigits: 4 })
+  const partPercent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 })
+  const signed = new Intl.NumberFormat(locale, { signDisplay: 'exceptZero' })
   const date = new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: '2-digit',
@@ -170,7 +318,23 @@ function formatters(locale) {
   })
   return {
     number: value => number.format(value),
-    percent: value => percent.format(value),
+    percent: value => {
+      const distanceFromFull = Math.abs(value - 1) * 100
+      return distanceFromFull > 0 && distanceFromFull < 0.1
+        ? new Intl.NumberFormat(locale, {
+            style: 'percent',
+            maximumFractionDigits: Math.max(2, Math.ceil(-Math.log10(distanceFromFull))),
+          }).format(value)
+        : percent.format(value)
+    },
+    partPercent: ratio => {
+      if (ratio > 0 && ratio < 0.001) return `<${partPercent.format(0.001)}`
+      if (ratio > 0.999 && ratio < 1) return `>${partPercent.format(0.999)}`
+      return partPercent.format(ratio)
+    },
+    exactBytes: value => `${number.format(value)} B`,
+    signedBytes: value => `${signed.format(value)} B`,
+    signedTokens: value => `${signed.format(value)} ${Math.abs(value) === 1 ? 'token' : 'tokens'}`,
     time: at => {
       const time = Date.parse(at)
       return Number.isFinite(time) ? date.format(time) : ''
@@ -214,115 +378,457 @@ function latestRequest(env, request) {
     'section',
     null,
     h('h3', null, t.recent),
-    request
-      ? h(
-          env.fragment,
-          null,
-          request.inputTokens !== undefined
-            && h(
-              'div',
-              { className: 'context-window-figure' },
-              h('strong', null, fmt.tokens(request.inputTokens)),
-              h('span', null, t.input),
-            ),
-          h(
-            'p',
-            null,
-            [
-              counted('messagesCount', request.userMessages + request.assistantMessages),
-              counted('toolsCount', request.tools),
-              ...(request.skills ? [counted('skillsCount', request.skills)] : []),
-            ].join(' · '),
-          ),
-          reportTime(env, t.submitted, request.at),
-          h(
-            'details',
-            { className: 'context-request-details' },
-            h('summary', null, t.detail),
-            countRows(
-              env,
-              sources
-                .slice(1)
-                .map(([label, , key]) => [key === 'tools' ? t.tools : t[label], fmt.number(request[key])])
-                .concat([[t.images, fmt.number(request.images)]]),
-            ),
-            request.creator && h('p', null, t.creator),
-          ),
-        )
-      : h('p', null, t.noRequest),
-  )
-}
-
-function windowUsage(env, report) {
-  const { h, ui, t, fmt } = env
-  const { used, size } = report ?? {}
-  const measured = used !== undefined || size !== undefined
-  const windowValue = used !== undefined && size > 0 ? `${fmt.number(used)} / ${fmt.tokens(size)}` : undefined
-  return h(
-    'section',
-    null,
-    h('h3', null, t.window),
-    windowValue
-      ? h(
-          'div',
-          { className: 'context-window-figure' },
-          h('strong', null, fmt.percent(Math.min(1, used / size))),
-          h(ui.Meter, { label: t.window, value: used, max: size, valueText: windowValue, size: 'md' }),
-          h('span', { className: 'context-window-value' }, windowValue),
-        )
-      : measured
-        ? countRows(env, [
-            [t.used, used === undefined ? t.missing : fmt.tokens(used)],
-            [t.capacity, size === undefined ? t.missing : fmt.tokens(size)],
-          ])
-        : h('p', null, t.noWindow),
-    measured && reportTime(env, report.configuredSize ? t.configuredWindow : t.fromHarness, report.at),
-  )
-}
-
-function windowHistory(env, windows) {
-  const { h, ui, t, fmt, counted } = env
-  if (windows.filter(item => item.window).length < 2) return null
-  const points = windows.map(({ turn, window }) => ({
-    key: turn.ref,
-    label: fmt.number(turn.number),
-    title: counted('turn', turn.number),
-    ...(window
-      ? {
-          value: window.used,
-          note: [fmt.time(window.at), ...(window.size ? [`${fmt.number(window.used)} / ${fmt.tokens(window.size)}`] : [])].join(' · '),
-        }
-      : {}),
-  }))
-  return h(
-    'section',
-    { className: 'context-window-history' },
-    h('h3', null, t.windowHistory),
-    h(ui.LineChart, { points, label: t.usedTokens, format: fmt.chartTokens, height: 100 }),
     h(
-      'details',
+      env.fragment,
       null,
-      h('summary', null, t.reports),
-      countRows(
-        env,
-        points.map(point => [point.title, point.value === undefined ? t.missing : fmt.tokens(point.value)]),
+      request.inputTokens !== undefined
+        && h(
+          'div',
+          { className: 'context-legacy-request-figure' },
+          h('strong', null, fmt.tokens(request.inputTokens)),
+          h('span', null, t.input),
+        ),
+      h(
+        'p',
+        null,
+        [
+          counted('messagesCount', request.userMessages + request.assistantMessages),
+          counted('toolsCount', request.tools),
+          ...(request.skills ? [counted('skillsCount', request.skills)] : []),
+        ].join(' · '),
+      ),
+      reportTime(env, t.submitted, request.at),
+      h(
+        'details',
+        { className: 'context-request-details' },
+        h('summary', null, t.detail),
+        countRows(
+          env,
+          sources
+            .slice(1)
+            .map(([label, , key]) => [key === 'tools' ? t.tools : t[label], fmt.number(request[key])])
+            .concat([[t.images, fmt.number(request.images)]]),
+        ),
+        request.creator && h('p', null, t.creator),
       ),
     ),
   )
 }
 
-function requestChange({ h, t, fmt }, step, previous) {
-  if (!previous || previous.sequence + 1 !== step.sequence || step.unmeasuredTools || previous.unmeasuredTools) {
-    return step.freshContext ? t.reset : step.sequence === 1 ? t.first : null
+function windowReading(fmt, used, size) {
+  return size > 0 ? `${fmt.number(used)} / ${fmt.tokens(size)}` : fmt.tokens(used)
+}
+
+function sourceLabel(t, source) {
+  return source === 'claude-sdk' ? t.claude : t.fromHarness
+}
+
+function windowUsage(env, report) {
+  const { h, t, fmt } = env
+  const { used, size } = report
+  if (used === undefined || !(size > 0)) {
+    return countRows(env, [
+      [t.used, used === undefined ? t.missing : fmt.tokens(used)],
+      [t.capacity, size === undefined ? t.missing : fmt.tokens(size)],
+    ])
   }
-  const changes = sources.map(([label, field]) => ({ label: t[label], amount: step.bytes[field] - previous.bytes[field] }))
-  const delta = sum(changes.map(change => change.amount))
-  const prefix = step.freshContext ? `${t.reset} · ` : ''
-  if (delta === 0) return prefix + (changes.some(change => change.amount) ? t.redistributed : t.unchanged)
-  const direction = Math.sign(delta)
-  const driver = changes.reduce((largest, item) => (item.amount * direction > largest.amount * direction ? item : largest))
-  const why = delta > 0 ? t.grew(driver.label, fmt.bytes(driver.amount)) : t.shrank(driver.label, fmt.bytes(-driver.amount))
-  return h('span', null, prefix, h('b', null, `${delta > 0 ? '+' : '−'}${fmt.bytes(Math.abs(delta))}`), ` ${t.change} · ${why}`)
+  const share = used / size
+  const percent = fmt.percent(share)
+  const value = windowReading(fmt, used, size)
+  return h(
+    'div',
+    { className: 'context-window-figure' },
+    h('div', { className: 'context-window-figures' }, h('strong', null, percent), h('span', null, value)),
+    h(
+      'span',
+      {
+        className: 'context-window-meter',
+        role: 'meter',
+        'aria-label': t.window,
+        'aria-valuemin': 0,
+        'aria-valuemax': size,
+        'aria-valuenow': Math.min(used, size),
+        'aria-valuetext': `${value} · ${percent}`,
+      },
+      h('span', { style: { width: `${Math.min(share, 1) * 100}%` } }),
+    ),
+  )
+}
+
+const usedCategoryOrder = [
+  'system_prompt',
+  'system_tools',
+  'mcp_tools',
+  'messages',
+  'mcp_instructions',
+  'custom_agents',
+  'memory_files',
+  'skills',
+  'used',
+]
+const chartColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)']
+const partColor = ({ series }) => (series === undefined ? 'var(--faint)' : (chartColors[series] ?? 'var(--faint)'))
+const sumParts = parts => sum(parts.map(part => part.tokens))
+
+function categoryParts(categories, t) {
+  const totals = new Map()
+  for (const { kind, id, tokens } of categories) {
+    const key = id ?? kind
+    const label = t.categories[id] ?? t[kind === 'used' ? 'usedOther' : kind]
+    totals.set(key, { label, tokens: (totals.get(key)?.tokens ?? 0) + tokens, series: usedCategoryOrder.indexOf(key) })
+  }
+  return [...totals.values()].toSorted((a, b) => a.series - b.series)
+}
+
+function windowParts(env, parts, denominator, className = '') {
+  const { h, fmt } = env
+  return h(
+    'div',
+    { className: `context-window-parts ${className}` },
+    denominator && denominator > 0
+      ? h(
+          'div',
+          { className: 'ui-share' },
+          h(
+            'div',
+            { className: 'context-window-parts-bar', 'aria-hidden': true },
+            parts
+              .filter(part => part.tokens > 0)
+              .map(part =>
+                h('span', { key: part.label, style: { width: `${(part.tokens / denominator) * 100}%`, background: partColor(part) } }),
+              ),
+          ),
+          h(
+            'ul',
+            { className: 'ui-share-parts' },
+            parts.map(part =>
+              h(
+                'li',
+                { key: part.label },
+                h('i', { className: 'ui-chart-swatch', 'aria-hidden': true, style: { background: partColor(part) } }),
+                h('span', { className: 'ui-share-name' }, part.label),
+                h('span', { className: 'ui-share-value' }, fmt.tokens(part.tokens)),
+                h('span', { className: 'ui-share-percent' }, fmt.partPercent(part.tokens / denominator)),
+              ),
+            ),
+          ),
+        )
+      : countRows(
+          env,
+          parts.map(part => [part.label, fmt.tokens(part.tokens)]),
+        ),
+  )
+}
+
+function windowBreakdown(env, { used, size }, breakdown) {
+  const { h, t, fmt } = env
+  const categories = breakdown.categories
+  const usedParts = categoryParts(
+    categories.filter(category => category.kind === 'used'),
+    t,
+  )
+  const classified = sumParts(usedParts)
+  const usedDenominator = used !== undefined && classified <= used ? used : undefined
+  const usedCaption = [
+    ...(used === undefined ? [] : [t.usedTotal(fmt.tokens(used))]),
+    ...(classified === used ? [] : [t.classified(fmt.tokens(classified))]),
+  ].join(' · ')
+
+  const messageCategory = categories.filter(category => category.kind === 'used' && category.id === 'messages')
+  const messageTotal = messageCategory.length > 0 ? sum(messageCategory.map(category => category.tokens)) : undefined
+  const messageParts = Object.entries(t.messageParts).flatMap(([field, label], series) => {
+    const tokens = breakdown.messageBreakdown?.[field]
+    return tokens === undefined ? [] : [{ label, tokens, series }]
+  })
+  const hasMessageParts = messageParts.length > 0
+  const itemized = sumParts(messageParts)
+  const messageDenominator = messageTotal !== undefined && itemized <= messageTotal ? messageTotal : undefined
+  if (messageDenominator !== undefined && itemized < messageDenominator) {
+    messageParts.push({ label: t.unitemized, tokens: messageDenominator - itemized })
+  }
+
+  const freeParts = categoryParts(
+    categories.filter(category => category.kind === 'free'),
+    t,
+  )
+  const bufferParts = categoryParts(
+    categories.filter(category => category.kind === 'buffer'),
+    t,
+  )
+  const free = sumParts(freeParts)
+  const buffer = sumParts(bufferParts)
+  const capacityComplete =
+    used !== undefined && size !== undefined && size > 0 && freeParts.length > 0 && bufferParts.length > 0 && used + free + buffer === size
+  const capacityParts = capacityComplete
+    ? [
+        { label: t.used, tokens: used, series: 0 },
+        { label: t.free, tokens: free },
+        { label: t.buffer, tokens: buffer, series: 1 },
+      ]
+    : [...freeParts, ...bufferParts]
+  const deferredParts = categoryParts(
+    categories.filter(category => category.kind === 'deferred'),
+    t,
+  )
+  const provider = breakdown.providerUsage
+
+  return h(
+    'section',
+    { className: 'context-window-breakdown' },
+    h('h3', null, t.breakdown),
+    usedParts.length > 0
+      && h(
+        'div',
+        null,
+        h('h4', null, t.usedCategories),
+        h('p', null, usedCaption),
+        windowParts(env, usedParts, usedDenominator, 'context-window-used-parts'),
+      ),
+    hasMessageParts
+      && h(
+        'details',
+        { className: 'context-window-messages' },
+        h('summary', null, t.messageBreakdown),
+        messageTotal !== undefined && h('p', null, t.messageTotal(fmt.tokens(messageTotal))),
+        windowParts(env, messageParts, messageDenominator, 'context-window-message-parts'),
+      ),
+    capacityParts.length > 0
+      && h(
+        'div',
+        null,
+        h('h4', null, t.capacityParts),
+        size !== undefined && h('p', null, t.capacityTotal(fmt.tokens(size))),
+        windowParts(env, capacityParts, capacityComplete ? size : undefined, 'context-window-capacity-parts'),
+      ),
+    deferredParts.length > 0
+      && h('div', null, h('h4', null, t.deferred), h('p', null, t.deferredNote), windowParts(env, deferredParts, undefined)),
+    provider
+      && h(
+        'div',
+        null,
+        h('h4', null, t.providerUsage),
+        h('p', null, t.providerSource),
+        countRows(
+          env,
+          [
+            [t.providerInput, fmt.number(provider.inputTokens)],
+            [t.providerOutput, fmt.number(provider.outputTokens)],
+          ],
+          'context-window-provider-counts',
+        ),
+      ),
+  )
+}
+function windowChoices({ h, t, fmt, counted }, rows, chosen, select, resets, completedCompactions) {
+  return h(
+    'ol',
+    { className: 'context-window-choices' },
+    rows.map(row => {
+      const { turn, window, delta } = row
+      const title = h(
+        'span',
+        { className: 'context-window-turn' },
+        counted('turn', turn.number),
+        completedCompactions.has(turn.ref) && h('span', { className: 'window-compaction-badge' }, t.compacted),
+      )
+      return h(
+        'li',
+        { key: turn.ref },
+        resets.has(turn.number) && h('div', { className: 'context-window-reset' }, t.reset),
+        window
+          ? h(
+              'button',
+              { type: 'button', className: 'context-window-choice', 'aria-pressed': row === chosen, onClick: () => select(row) },
+              title,
+              h('span', null, windowReading(fmt, window.used, window.size)),
+              delta !== undefined && h('small', null, t.windowDelta(fmt.signedTokens(delta))),
+            )
+          : h('div', { className: 'context-window-missing' }, title, h('span', null, t.missing)),
+      )
+    }),
+  )
+}
+
+function compactionHistory(env, events, revealTurn) {
+  const { h, ui, t, fmt, counted } = env
+  return h(
+    'section',
+    { className: 'context-compactions' },
+    h('h3', null, t.compaction),
+    h(
+      'ul',
+      null,
+      events.toReversed().map(({ at, turn, source, status, trigger, beforeTokens, afterTokens, durationMs }, index) => {
+        const readings = []
+        if (beforeTokens !== undefined) readings.push([t.before, fmt.tokens(beforeTokens)])
+        if (afterTokens !== undefined) readings.push([t.after, fmt.tokens(afterTokens)])
+        if (durationMs !== undefined) readings.push([t.compactionDuration, fmt.duration(durationMs)])
+        return h(
+          'li',
+          { key: `${at}-${index}` },
+          h(
+            'div',
+            { className: 'context-section-heading' },
+            h('strong', null, t.compactionStatus[status]),
+            h('time', { dateTime: at }, fmt.time(at)),
+          ),
+          h(
+            'p',
+            null,
+            [sourceLabel(t, source), ...(trigger ? [t[trigger]] : []), ...(turn ? [counted('turn', turn.number)] : [])].join(' · '),
+          ),
+          readings.length > 0 && countRows(env, readings),
+          turn && revealTurn && h(ui.Button, { variant: 'ghost', onClick: () => revealTurn(turn.ref) }, counted('viewTurn', turn.number)),
+        )
+      }),
+    ),
+  )
+}
+
+function windowHistory(env, { window: latest, windows, events = [] }, revealTurn, pinned, setPinned) {
+  const { h, ui, t, fmt, fragment, counted } = env
+  const reports = windows.filter(row => row.window)
+  const latestSample = reports.at(-1)
+  const pinnedSample = reports.find(row => row.turn.ref === pinned)
+  const latestReading = latestSample?.window
+  const sameLatest =
+    latestReading
+    && latest
+    && latestReading.at === latest.at
+    && latestReading.used === latest.used
+    && latestReading.size === latest.size
+    && latestReading.source === latest.source
+    && latestReading.epoch === latest.epoch
+  const chosen = pinnedSample ?? (!latest || sameLatest ? latestSample : undefined)
+  const report = pinnedSample?.window ?? latest ?? latestReading
+  const focusedTurn = chosen?.turn
+  const breakdown = report?.source === 'claude-sdk' ? (chosen?.window?.breakdown ?? report.breakdown) : undefined
+  const resets = new Set(events.flatMap(event => (event.kind === 'reset' && event.turn ? [event.turn.number] : [])))
+  const compactions = events.filter(event => event.kind === 'compaction')
+  const completedCompactions = new Set(compactions.flatMap(event => (event.status === 'completed' && event.turn ? [event.turn.ref] : [])))
+  const points = windows.flatMap(({ turn, window, delta }, index) => {
+    const point = { key: turn.ref, label: fmt.number(turn.number), title: counted('turn', turn.number), value: window?.used }
+    return window && windows[index - 1]?.window && delta === undefined ? [{ key: `gap-${turn.ref}`, label: '' }, point] : [point]
+  })
+  const firstRecent = reports.length > 3 ? Math.max(0, windows.indexOf(reports.at(-3))) : 0
+  const choose = row => setPinned(row === latestSample && (!latest || sameLatest) ? undefined : row.turn.ref)
+  const selected = rows => windowChoices(env, rows, chosen, choose, resets, completedCompactions)
+  const windowSource = report && [sourceLabel(t, report.source), ...(report.configuredSize ? [t.configuredWindow] : [])].join(' · ')
+  return h(
+    fragment,
+    null,
+    h(
+      'section',
+      { className: 'context-window-overview' },
+      h(
+        'header',
+        { className: 'context-section-heading' },
+        h('h3', null, t.window),
+        focusedTurn && h('span', null, counted('turn', focusedTurn.number)),
+      ),
+      report ? h(fragment, null, windowUsage(env, report), reportTime(env, windowSource, report.at)) : h('p', null, t.noWindow),
+    ),
+    reports.length > 0
+      && h(
+        'section',
+        { className: 'context-window-history' },
+        h(
+          'header',
+          { className: 'context-section-heading' },
+          h('h3', null, t.windowHistory),
+          h('span', null, counted('reportCount', reports.length)),
+        ),
+        reports.length >= 3
+          && h(
+            fragment,
+            null,
+            h('p', { className: 'window-plot-unit', 'aria-hidden': true }, t.usedTokens),
+            h(ui.LineChart, { points, label: t.usedTokens, format: fmt.chartTokens, height: 100 }),
+          ),
+        firstRecent > 0 && h('details', null, h('summary', null, t.older), selected(windows.slice(0, firstRecent))),
+        selected(windows.slice(firstRecent)),
+        ((focusedTurn && revealTurn) || pinnedSample)
+          && h(
+            'div',
+            { className: 'context-window-actions' },
+            focusedTurn
+              && revealTurn
+              && h(ui.Button, { variant: 'ghost', onClick: () => revealTurn(focusedTurn.ref) }, counted('viewTurn', focusedTurn.number)),
+            pinnedSample && h(ui.Button, { variant: 'ghost', onClick: () => setPinned(undefined) }, t.latestWindow),
+          ),
+      ),
+    report && breakdown && windowBreakdown(env, report, breakdown),
+    compactions.length > 0 && compactionHistory(env, compactions, revealTurn),
+  )
+}
+
+function requestSummary({ h, t, fmt, fragment }, step, previous, values) {
+  const largest = Math.max(...values)
+  const complete =
+    !step.freshContext && previous && previous.sequence + 1 === step.sequence && !step.unmeasuredTools && !previous.unmeasuredTools
+  const changes = complete ? requestColumn(previous).values.map((value, index) => values[index] - value) : undefined
+  const gain = changes && Math.max(...changes)
+  const driver = gain > 0 ? gain : changes && Math.min(...changes)
+  const group = changes && driver ? t[seriesKeys[changes.indexOf(driver)]] : undefined
+  return h(
+    'dl',
+    { className: 'context-request-summary' },
+    largest > 0
+      && h('div', null, h('dt', null, t.biggest), h('dd', null, t[seriesKeys[values.indexOf(largest)]], ' · ', fmt.exactBytes(largest))),
+    changes
+      && h(
+        'div',
+        null,
+        group && driver
+          ? h(
+              fragment,
+              null,
+              h('dt', null, driver > 0 ? t.growth : t.reduction),
+              h('dd', null, driver > 0 ? t.grew(group, fmt.exactBytes(driver)) : t.shrank(group, fmt.exactBytes(-driver))),
+            )
+          : h(fragment, null, h('dt', null, t.change), h('dd', null, t.unchanged)),
+        h('dd', { className: 'context-net-change' }, t.net(fmt.signedBytes(sum(changes)))),
+      ),
+  )
+}
+
+function requestToolResults({ h, t, fmt }, contributions, revealTool) {
+  if (!contributions) return null
+  const { largest } = contributions
+  const refs = new Set(largest.flatMap(row => (row.toolRef ? [row.toolRef] : [])))
+  const added = contributions.added.filter(row => !row.toolRef || !refs.has(row.toolRef))
+  if (!largest.length && !added.length) return null
+  const rows = entries =>
+    h(
+      'ul',
+      { className: 'context-tool-result-rows' },
+      entries.map(({ bytes, inclusion, name = t.unnamed, toolRef }, index) => {
+        const children = [h('bdi', null, name), h('span', null, fmt.exactBytes(bytes), ' · ', t.inclusion[inclusion])]
+        return h(
+          'li',
+          { key: toolRef ?? index },
+          toolRef && revealTool
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'context-tool-result-link',
+                  'aria-label': t.viewTool(name),
+                  onClick: () => revealTool(toolRef),
+                },
+                ...children,
+              )
+            : h('div', { className: 'context-tool-result' }, ...children),
+        )
+      }),
+    )
+  return h(
+    'section',
+    { className: 'context-request-tools' },
+    h('h3', null, t.requestTools),
+    largest.length > 0 && h('div', null, h('h4', null, t.largest), rows(largest)),
+    added.length > 0 && h('div', null, h('h4', null, added.length === contributions.added.length ? t.added : t.additional), rows(added)),
+  )
 }
 
 function requestDetails({ h, t, fmt }, step) {
@@ -364,7 +870,7 @@ function requestColumn(step, title) {
   }
 }
 
-function requestHistory(env, steps, revealTurn, pinned, setPinned) {
+function requestHistory(env, steps, revealTurn, revealTool, pinned, setPinned) {
   const { h, ui, t, fmt, fragment, counted } = env
   const last = steps.length - 1
   const selectedIndex = pinned === undefined ? last : steps.findIndex(step => step.sequence === pinned)
@@ -396,7 +902,6 @@ function requestHistory(env, steps, revealTurn, pinned, setPinned) {
     select(target)
     buttons[target]?.focus()
   }
-  const change = requestChange(env, step, steps[index - 1])
   const status = [t[step.status], step.toolCalls ? counted('callsRequested', step.toolCalls) : undefined].filter(Boolean).join(' · ')
   return h(
     fragment,
@@ -410,8 +915,13 @@ function requestHistory(env, steps, revealTurn, pinned, setPinned) {
         h('h3', null, t.trend),
         h('span', null, counted(steps[0].sequence > 1 ? 'retained' : 'requests', steps.length)),
       ),
-      h('div', { className: 'context-history-figure' }, h('strong', null, fmt.bytes(sum(column.values))), h('span', null, t.textInput)),
-      h('p', { className: 'context-history-delta' }, change),
+      h(
+        'div',
+        { className: 'context-history-figure' },
+        h('strong', null, fmt.exactBytes(sum(column.values))),
+        h('span', null, t.textInput),
+      ),
+      (step.freshContext || step.sequence === 1) && h('p', { className: 'context-history-marker' }, step.freshContext ? t.reset : t.first),
       h(
         'div',
         { onKeyDown: move },
@@ -442,6 +952,7 @@ function requestHistory(env, steps, revealTurn, pinned, setPinned) {
       'section',
       { 'aria-label': t.composition, className: 'context-composition' },
       h('header', { className: 'context-heading' }, h('h3', null, t.composition), h('time', { dateTime: step.at }, fmt.time(step.at))),
+      requestSummary(env, step, steps[index - 1], column.values),
       h(ui.ShareBar, {
         label: t.composition,
         parts: seriesKeys.map((key, part) => ({ key, label: t[key], name: t[key], value: column.values[part] })),
@@ -467,6 +978,7 @@ function requestHistory(env, steps, revealTurn, pinned, setPinned) {
           && h(ui.Button, { variant: 'ghost', onClick: () => revealTurn(step.turn.ref) }, counted('viewTurn', step.turn.number)),
       ),
     ),
+    requestToolResults(env, step.toolContributions, revealTool),
   )
 }
 
@@ -517,13 +1029,23 @@ function toolActivity(env, { total, failures, groups }) {
 }
 
 /** The workbench supplies the current session's projected statistics, React and chart controls. */
-export default function ContextInsights({ react, ui, locale = 'zh-CN', context, revealTurn }) {
+export default function ContextInsights({ react, ui, locale = 'zh-CN', context, revealTurn, revealTool }) {
   const { createElement: h, Fragment: fragment } = react
   const [pinned, setPinned] = react.useState()
+  const [pinnedWindow, setPinnedWindow] = react.useState()
   const t = copy[locale] ?? copy['zh-CN']
   const fmt = formatters(locale)
   const env = { h, ui, t, fmt, fragment, counted: (key, n) => t[key](fmt.number(n), n) }
-  const windows = context && h(fragment, null, windowUsage(env, context.window), windowHistory(env, context.windows))
+  // A legacy workbench supplied these optional measurements before it supplied the Harness kind.
+  const hasRequests = context?.steps.length > 0 || context?.request !== undefined
+  const showWindows =
+    context
+    && (context.kind === 'harness'
+      || !hasRequests
+      || context.window
+      || context.windows.length
+      || context.events?.some(event => event.kind === 'compaction'))
+  const fresh = context && context.steps.length === 0 && context.windows.length === 0 && context.freshAt
   return h(
     'div',
     { className: 'context-insights' },
@@ -532,11 +1054,12 @@ export default function ContextInsights({ react, ui, locale = 'zh-CN', context, 
       ? h(
           fragment,
           null,
-          context.steps.length ? requestHistory(env, context.steps, revealTurn, pinned, setPinned) : windows,
-          context.steps.length === 0 && latestRequest(env, context.request),
+          context.steps.length > 0
+            ? requestHistory(env, context.steps, revealTurn, revealTool, pinned, setPinned)
+            : context.request && latestRequest(env, context.request),
+          showWindows && windowHistory(env, context, revealTurn, pinnedWindow, setPinnedWindow),
+          fresh && h('section', null, h('h3', null, t.record), reportTime(env, t.fresh, fresh)),
           toolActivity(env, context.tools),
-          context.steps.length > 0 && windows,
-          context.freshAt && h('section', null, h('h3', null, t.record), reportTime(env, t.fresh, context.freshAt)),
         )
       : h('p', null, t.unavailable),
   )
@@ -567,7 +1090,7 @@ const styles = `
   }
   summary:hover { color: var(--ink); }
   summary:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
-  .context-heading, .context-step-nav {
+  .context-heading, .context-section-heading, .context-step-nav {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -577,9 +1100,9 @@ const styles = `
     font-size: var(--fs-caption);
     line-height: var(--lh-caption);
   }
-  .context-heading { margin-bottom: var(--sp-12); }
-  .context-heading h3 { margin: 0; color: var(--ink); }
-  .context-history-figure, .context-window-figure {
+  :is(.context-heading, .context-section-heading) { margin-bottom: var(--sp-12); }
+  :is(.context-heading, .context-section-heading) h3 { margin: 0; color: var(--ink); }
+  .context-history-figure, .context-legacy-request-figure {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
@@ -587,12 +1110,9 @@ const styles = `
     color: var(--muted);
     font-size: var(--fs-caption);
   }
-  .context-history-figure strong, .context-window-figure strong { color: var(--ink); font-weight: 600; }
+  .context-history-figure strong, .context-legacy-request-figure strong { color: var(--ink); font-weight: 600; }
   .context-history-figure strong { font-size: var(--fs-hero); line-height: var(--lh-hero); }
-  .context-window-figure strong { font-size: var(--fs-title); }
-  .context-history-delta { min-height: var(--lh-caption); margin-block: var(--sp-4) var(--sp-12); }
-  .context-history-delta b { color: var(--ink-2); font-weight: 500; }
-  .context-window-value { flex-basis: 100%; }
+  .context-legacy-request-figure strong { font-size: var(--fs-title); }
   .context-step-nav { margin-top: var(--sp-6); }
   .context-step-selector { display: inline-flex; align-items: center; gap: var(--sp-4); color: var(--ink-2); }
   .context-step-selector button > span { font-size: var(--fs-title); }
@@ -634,6 +1154,239 @@ const styles = `
   .context-tool-track { display: flex; height: var(--sp-4); overflow: hidden; border-radius: var(--r-full); background: var(--track); }
   .context-tool-track i { background: var(--meter); }
   .context-tool-track .context-tool-failure { background: var(--red); }
+  .context-window-figure {
+    display: grid;
+    gap: var(--sp-8);
+  }
+  .context-window-figures {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4) var(--sp-12);
+    color: var(--muted);
+    font-size: var(--fs-caption);
+  }
+  .context-window-figures strong {
+    color: var(--ink);
+    font-size: var(--fs-title);
+    font-weight: 600;
+  }
+  .context-window-meter {
+    display: block;
+    height: var(--sp-8);
+    overflow: hidden;
+    border-radius: var(--r-full);
+    background: var(--track);
+  }
+  .context-window-meter > span {
+    display: block;
+    height: 100%;
+    background: var(--meter);
+  }
+  .window-plot-unit {
+    padding-bottom: var(--sp-4);
+  }
+  .context-window-choices,
+  .context-compactions ul,
+  .context-tool-result-rows {
+    display: grid;
+    gap: var(--sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .context-window-choices {
+    margin-top: var(--sp-8);
+  }
+  .context-window-choice,
+  .context-window-missing,
+  .context-tool-result,
+  .context-tool-result-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-8);
+    width: 100%;
+    padding: var(--sp-8);
+    border: 1px solid transparent;
+    border-radius: var(--r-8);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    text-align: start;
+  }
+  .context-window-choice,
+  .context-tool-result-link {
+    cursor: pointer;
+  }
+  .context-window-choice:hover,
+  .context-tool-result-link:hover {
+    background: var(--hover);
+  }
+  .context-window-choice:focus-visible,
+  .context-tool-result-link:focus-visible {
+    outline: 1px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .context-window-choice[aria-pressed='true'] {
+    border-color: var(--line);
+    background: var(--hover);
+    font-weight: 600;
+  }
+  .context-window-turn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-6);
+  }
+  .window-compaction-badge {
+    padding-inline: var(--sp-6);
+    border-radius: var(--r-6);
+    background: var(--sunken);
+    color: var(--ink-2);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .context-window-choice small {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: inherit;
+    font-weight: 400;
+  }
+  .context-window-missing {
+    color: var(--muted);
+  }
+  .context-window-reset {
+    margin-block: var(--sp-8) var(--sp-4);
+    border-top: 1px dashed var(--line);
+    padding-top: var(--sp-4);
+    color: var(--muted);
+    font-size: var(--fs-caption);
+  }
+  .context-window-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin-top: var(--sp-8);
+  }
+  .context-window-breakdown,
+  .context-request-tools {
+    display: grid;
+    gap: var(--sp-12);
+  }
+  .context-window-breakdown h3,
+  .context-request-tools h3 {
+    margin-bottom: 0;
+  }
+  .context-window-breakdown h4,
+  .context-request-tools h4 {
+    margin: 0 0 var(--sp-4);
+    color: var(--muted);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    font-weight: 500;
+  }
+  .context-window-breakdown .context-window-messages {
+    margin-top: 0;
+    padding-inline-start: var(--sp-12);
+    border-inline-start: 1px solid var(--line);
+  }
+  .context-window-parts {
+    margin-top: var(--sp-6);
+  }
+  .context-window-parts-bar {
+    display: flex;
+    height: var(--sp-8);
+    overflow: hidden;
+    border-radius: var(--r-full);
+    background: var(--track);
+  }
+  .context-window-parts-bar > span {
+    flex: none;
+  }
+  .context-window-parts-bar > span + span {
+    box-shadow: inset 1px 0 var(--canvas);
+  }
+  .context-window-parts .ui-share-parts > li {
+    grid-template-columns: var(--sp-8) minmax(0, 1fr) auto minmax(6ch, auto);
+  }
+  .context-window-parts .ui-share-name {
+    display: block;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .context-window-provider-counts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-12);
+    padding-top: var(--sp-6);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    color: var(--muted);
+  }
+  .context-window-provider-counts dd {
+    color: var(--ink);
+    font-size: var(--fs-ui);
+    line-height: var(--lh-ui);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .context-compactions li + li {
+    border-top: 1px solid var(--line);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-8);
+  }
+  .context-compactions li .context-section-heading {
+    margin-bottom: var(--sp-4);
+  }
+  .context-compactions li strong {
+    color: var(--ink);
+  }
+  .context-compactions li .ui-button {
+    margin-top: var(--sp-4);
+  }
+  .context-history .context-history-marker {
+    margin-block: var(--sp-4) var(--sp-8);
+  }
+  .context-request-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 135px), 1fr));
+    gap: var(--sp-8);
+    margin-bottom: var(--sp-12);
+  }
+  .context-request-summary > div {
+    padding: var(--sp-8);
+    border: 1px solid var(--line);
+    border-radius: var(--r-8);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+  }
+  .context-request-summary dt,
+  .context-request-summary .context-net-change {
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .context-request-summary dd {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .context-tool-result,
+  .context-tool-result-link {
+    border-color: var(--line);
+    grid-template-columns: minmax(0, 1fr);
+    overflow-wrap: anywhere;
+  }
+  .context-tool-result-link bdi {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .context-tool-result span,
+  .context-tool-result-link span {
+    color: var(--muted);
+  }
 }
 @media (hover: none) {
   .context-insights .context-history .ui-chart-tip { display: none; }

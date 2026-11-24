@@ -1,0 +1,97 @@
+{
+  "formatVersion": 1,
+  "plugins": [
+    {
+      "id": "shift-handoff",
+      "folder": "plugins/shift-handoff",
+      "manifest": "latch-plugin.json",
+      "files": ["SKILL.md"],
+      "facets": ["skill"],
+      "zh": {
+        "name": "交接清单",
+        "kind": "技能",
+        "summary": "把会话整理成接手人可以照着做的交接说明。",
+        "use": "在接收 Latch 技能的「我的 Agent」中选用「交接清单」，再发送「帮我整理一份交接」。",
+        "agent": "提供核对证据、列出未决问题和下一步的写作步骤。适用于内置 Agent 和接收 Latch 技能的 Harness。",
+        "access": "只包含文本技能，正文会交给选用它的 Agent。"
+      },
+      "en": {
+        "name": "Shift handoff",
+        "kind": "Skill",
+        "summary": "Turn the conversation into handoff notes someone can act on.",
+        "use": "Select the handoff skill for an agent that accepts Latch skills. Ask it to prepare a handoff.",
+        "agent": "Gives the agent a method for reporting evidence, open questions and next steps. Supports the built-in agent and Harnesses that accept Latch skills.",
+        "access": "Contains text instructions that the selected agent can read."
+      }
+    },
+    {
+      "id": "release-review",
+      "folder": "plugins/release-review",
+      "manifest": "latch-plugin.json",
+      "files": ["host.mjs", "panel.mjs", "SKILL.md"],
+      "facets": ["panel", "tool", "skill"],
+      "zh": {
+        "name": "发布清单面板",
+        "kind": "会话面板 · 工具 · 技能",
+        "summary": "在对话旁勾选发布条件，把清单交给 Agent 核对。",
+        "use": "在内置 Agent 会话右栏点「＋」，打开「发布清单」。勾选后点「写入对话」，检查草稿再发送。",
+        "agent": "提供检查技能及汇总清单的工具。工具只汇总输入，实际测试证据仍需核对。",
+        "access": "包含用 Host 权限运行的模块和与工作台页面同权的面板。首次应用这份代码需在 Mac 确认。"
+      },
+      "en": {
+        "name": "Release checklist panel",
+        "kind": "Session panel · Tool · Skill",
+        "summary": "Mark release criteria beside the conversation and hand them to the agent.",
+        "use": "In a built-in agent session, choose + in the sidebar and open the release checklist. Add your selections to the draft and send it.",
+        "agent": "Adds a release review skill and a tool for summarizing the supplied checks. Test evidence still needs verification.",
+        "access": "Runs code with Host and workbench page permissions. Confirm this code on the host Mac before applying it."
+      }
+    },
+    {
+      "id": "release-check",
+      "folder": "plugins/release-check",
+      "manifest": "latch-app.json",
+      "files": ["src/checklist.ts", "src/index.tsx", "src/style.css"],
+      "facets": ["app"],
+      "zh": {
+        "name": "发布检查记录",
+        "kind": "应用页面",
+        "summary": "按项目发起检查，回看每一项的状态、证据和备注。",
+        "use": "先用样例数据预览页面。应用后，从「应用」打开「发布检查」，选择项目并开始一次检查。原生 iOS 当前需用手机浏览器打开。",
+        "agent": "页面会新开检查会话，读取它发起的回复并存档。使用所选项目的默认权限。",
+        "access": "隔离页面可读取允许的会话摘要、发起会话、读取自己发起的回复，并使用插件与项目存储。首次授予页面能力需在 Mac 确认。"
+      },
+      "en": {
+        "name": "Release check history",
+        "kind": "App page",
+        "summary": "Run a release check for a project and review evidence and notes later.",
+        "use": "Preview with sample data, then apply. Open the release check from Apps and choose a project. On iOS, open the full page in a mobile browser.",
+        "agent": "Starts a check in a new session with project defaults and keeps the reply from that session.",
+        "access": "An isolated page can list permitted session summaries, start sessions, read its own replies and use plugin and project storage. Grant new page capabilities on the host Mac."
+      }
+    },
+    {
+      "id": "context-insights",
+      "folder": "plugins/context-insights",
+      "manifest": "latch-plugin.json",
+      "files": ["panel.mjs"],
+      "facets": ["panel"],
+      "zh": {
+        "name": "上下文",
+        "kind": "会话面板",
+        "summary": "比较请求组成和逐轮窗口用量，点选工具结果可跳回原文。",
+        "use": "在会话右栏点「＋」，打开「上下文」。选择一次内置 Agent 请求可查看工具输出，选择窗口报告可回到对应轮次。Claude 上报分类或压缩时可查看明细。",
+        "agent": "供你查看会话统计，Agent 无需执行额外步骤。",
+        "access": "面板与工作台页面同权。上下文接口提供当前会话的只读统计和回合跳转。首次应用这份代码需在 Mac 确认。"
+      },
+      "en": {
+        "name": "Context",
+        "kind": "Session panel",
+        "summary": "Compare request inputs and window usage by turn. Jump to the tool output behind a change.",
+        "use": "Choose + in the session sidebar and open Context. Select a built-in agent request to inspect its tool outputs, or a window report to revisit its turn. Claude window categories and compaction details appear when reported.",
+        "agent": "Shows you session statistics without requiring extra work from the agent.",
+        "access": "The panel runs with workbench page permissions. The context interface provides read-only statistics and turn navigation for the current session. Confirm this code on the host Mac before applying it."
+      }
+    }
+  ]
+}
