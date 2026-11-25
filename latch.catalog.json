@@ -79,16 +79,16 @@
       "zh": {
         "name": "上下文",
         "kind": "会话面板",
-        "summary": "比较请求组成和逐轮窗口用量，点选工具结果可跳回原文。",
-        "use": "在会话右栏点「＋」，打开「上下文」。选择一次内置 Agent 请求可查看工具输出，选择窗口报告可回到对应轮次。Claude 上报分类或压缩时可查看明细。",
+        "summary": "查看上下文窗口还剩多少、哪一轮增长最多，以及哪些工具用得最多。",
+        "use": "在会话右栏点「＋」，打开「上下文」。Harness 报告已用量和容量后就能看到占比和剩余 tokens。选择一轮可回到原对话。内置 Agent 的请求可展开查看组成，并跳到对应的工具输出。",
         "agent": "供你查看会话统计，Agent 无需执行额外步骤。",
         "access": "面板与工作台页面同权。上下文接口提供当前会话的只读统计和回合跳转。首次应用这份代码需在 Mac 确认。"
       },
       "en": {
         "name": "Context",
         "kind": "Session panel",
-        "summary": "Compare request inputs and window usage by turn. Jump to the tool output behind a change.",
-        "use": "Choose + in the session sidebar and open Context. Select a built-in agent request to inspect its tool outputs, or a window report to revisit its turn. Claude window categories and compaction details appear when reported.",
+        "summary": "See how much context is left, which turn added the most tokens, and how often each tool ran.",
+        "use": "Choose + in the session sidebar and open Context. When the harness reports usage and capacity, the panel shows the percentage used and tokens remaining. Select a turn to revisit it. For built-in agent requests, inspect the input breakdown and jump to the original tool output.",
         "agent": "Shows you session statistics without requiring extra work from the agent.",
         "access": "The panel runs with workbench page permissions. The context interface provides read-only statistics and turn navigation for the current session. Confirm this code on the host Mac before applying it."
       }

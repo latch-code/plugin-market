@@ -87,6 +87,7 @@ const copy = {
     older: '更早的轮次',
     latestWindow: '回到最新报告',
     windowDelta: value => `较上一轮净变化 ${value}`,
+    largestWindowGrowth: '单轮增长最多',
     reportCount: n => `${n} 份报告`,
     compactionStatus: {
       in_progress: '进行中',
@@ -123,6 +124,10 @@ const copy = {
     noWindow: 'Harness 尚未报告窗口占用。',
     used: '已用',
     capacity: '窗口容量',
+    usedOfCapacity: '已用 / 总容量',
+    remainingCapacity: '剩余容量',
+    overCapacity: '超出容量',
+    includesBuffer: '含压缩预留',
     fromHarness: 'Harness 报告',
     configuredWindow: '容量来自模型设置',
     windowHistory: '逐轮窗口占用',
@@ -140,6 +145,7 @@ const copy = {
     unknownTool: '未命名工具',
     noCalls: '会话中还没有工具调用记录。',
     calls: n => `共 ${n} 次`,
+    callCount: n => `${n} 次`,
     failures: n => `${n} 次失败`,
     longest: time => `单次最长实测 ${time}`,
     more: n => `其余 ${n} 种工具`,
@@ -232,6 +238,7 @@ const copy = {
     older: 'Earlier turns',
     latestWindow: 'Return to latest report',
     windowDelta: value => `Net change from previous turn ${value}`,
+    largestWindowGrowth: 'Largest increase in one turn',
     reportCount: (n, count) => `${n} ${count === 1 ? 'report' : 'reports'}`,
     compactionStatus: {
       in_progress: 'In progress',
@@ -268,6 +275,10 @@ const copy = {
     noWindow: 'The Harness has not reported window usage.',
     used: 'Used',
     capacity: 'Window capacity',
+    usedOfCapacity: 'Used / total capacity',
+    remainingCapacity: 'Remaining capacity',
+    overCapacity: 'Over capacity',
+    includesBuffer: 'Includes compaction reserve',
     fromHarness: 'Reported by Harness',
     configuredWindow: 'Capacity from model settings',
     windowHistory: 'Window usage by turn',
@@ -285,6 +296,7 @@ const copy = {
     unknownTool: 'Unnamed tool',
     noCalls: 'No tool calls recorded in this chat yet.',
     calls: (n, count) => `${n} ${count === 1 ? 'call' : 'calls'}`,
+    callCount: (n, count) => `${n} ${count === 1 ? 'call' : 'calls'}`,
     failures: (n, count) => `${n} ${count === 1 ? 'failure' : 'failures'}`,
     longest: time => `Longest measured call ${time}`,
     more: (n, count) => `${n} more ${count === 1 ? 'tool' : 'tools'}`,
@@ -423,7 +435,7 @@ function sourceLabel(t, source) {
   return source === 'claude-sdk' ? t.claude : t.fromHarness
 }
 
-function windowUsage(env, report) {
+function windowUsage(env, report, breakdown) {
   const { h, t, fmt } = env
   const { used, size } = report
   if (used === undefined || !(size > 0)) {
@@ -435,10 +447,13 @@ function windowUsage(env, report) {
   const share = used / size
   const percent = fmt.percent(share)
   const value = windowReading(fmt, used, size)
+  const remaining = size - used
+  const unusedParts = breakdown?.categories.filter(part => part.kind === 'free' || part.kind === 'buffer')
+  const includesBuffer = unusedParts?.some(part => part.kind === 'buffer' && part.tokens > 0) && sumParts(unusedParts) === remaining
   return h(
     'div',
     { className: 'context-window-figure' },
-    h('div', { className: 'context-window-figures' }, h('strong', null, percent), h('span', null, value)),
+    h('div', { className: 'context-window-figures' }, h('strong', null, percent), h('span', null, t.used)),
     h(
       'span',
       {
@@ -451,6 +466,17 @@ function windowUsage(env, report) {
         'aria-valuetext': `${value} · ${percent}`,
       },
       h('span', { style: { width: `${Math.min(share, 1) * 100}%` } }),
+    ),
+    countRows(
+      env,
+      [
+        [t.usedOfCapacity, value],
+        [
+          remaining < 0 ? t.overCapacity : t.remainingCapacity,
+          h(env.fragment, null, fmt.tokens(Math.abs(remaining)), includesBuffer && h('small', null, t.includesBuffer)),
+        ],
+      ],
+      'context-window-amounts',
     ),
   )
 }
@@ -641,6 +667,12 @@ function windowChoices({ h, t, fmt, counted }, rows, chosen, select, resets, com
               { type: 'button', className: 'context-window-choice', 'aria-pressed': row === chosen, onClick: () => select(row) },
               title,
               h('span', null, windowReading(fmt, window.used, window.size)),
+              window.size > 0
+                && h(
+                  'span',
+                  { className: 'context-window-choice-meter', 'aria-hidden': true },
+                  h('span', { style: { width: `${Math.min(window.used / window.size, 1) * 100}%` } }),
+                ),
               delta !== undefined && h('small', null, t.windowDelta(fmt.signedTokens(delta))),
             )
           : h('div', { className: 'context-window-missing' }, title, h('span', null, t.missing)),
@@ -706,6 +738,7 @@ function windowHistory(env, { window: latest, windows, events = [] }, revealTurn
   const resets = new Set(events.flatMap(event => (event.kind === 'reset' && event.turn ? [event.turn.number] : [])))
   const compactions = events.filter(event => event.kind === 'compaction')
   const completedCompactions = new Set(compactions.flatMap(event => (event.status === 'completed' && event.turn ? [event.turn.ref] : [])))
+  const largestGrowth = reports.reduce((largest, row) => (row.delta > (largest?.delta ?? 0) ? row : largest), undefined)
   const points = windows.flatMap(({ turn, window, delta }, index) => {
     const point = { key: turn.ref, label: fmt.number(turn.number), title: counted('turn', turn.number), value: window?.used }
     return window && windows[index - 1]?.window && delta === undefined ? [{ key: `gap-${turn.ref}`, label: '' }, point] : [point]
@@ -714,6 +747,7 @@ function windowHistory(env, { window: latest, windows, events = [] }, revealTurn
   const choose = row => setPinned(row === latestSample && (!latest || sameLatest) ? undefined : row.turn.ref)
   const selected = rows => windowChoices(env, rows, chosen, choose, resets, completedCompactions)
   const windowSource = report && [sourceLabel(t, report.source), ...(report.configuredSize ? [t.configuredWindow] : [])].join(' · ')
+  const showHistory = reports.length > 0 && (windows.length > 1 || (latest && !sameLatest))
   return h(
     fragment,
     null,
@@ -724,11 +758,27 @@ function windowHistory(env, { window: latest, windows, events = [] }, revealTurn
         'header',
         { className: 'context-section-heading' },
         h('h3', null, t.window),
-        focusedTurn && h('span', null, counted('turn', focusedTurn.number)),
+        focusedTurn
+          && h(
+            'span',
+            { className: 'context-window-turn' },
+            counted('turn', focusedTurn.number),
+            !showHistory && resets.has(focusedTurn.number) && h('span', null, t.reset),
+            !showHistory && completedCompactions.has(focusedTurn.ref) && h('span', { className: 'window-compaction-badge' }, t.compacted),
+          ),
       ),
-      report ? h(fragment, null, windowUsage(env, report), reportTime(env, windowSource, report.at)) : h('p', null, t.noWindow),
+      report ? h(fragment, null, windowUsage(env, report, breakdown), reportTime(env, windowSource, report.at)) : h('p', null, t.noWindow),
+      ((focusedTurn && revealTurn) || pinnedSample)
+        && h(
+          'div',
+          { className: 'context-window-actions' },
+          focusedTurn
+            && revealTurn
+            && h(ui.Button, { variant: 'ghost', onClick: () => revealTurn(focusedTurn.ref) }, counted('viewTurn', focusedTurn.number)),
+          pinnedSample && h(ui.Button, { variant: 'ghost', onClick: () => setPinned(undefined) }, t.latestWindow),
+        ),
     ),
-    reports.length > 0
+    showHistory
       && h(
         'section',
         { className: 'context-window-history' },
@@ -745,17 +795,21 @@ function windowHistory(env, { window: latest, windows, events = [] }, revealTurn
             h('p', { className: 'window-plot-unit', 'aria-hidden': true }, t.usedTokens),
             h(ui.LineChart, { points, label: t.usedTokens, format: fmt.chartTokens, height: 100 }),
           ),
-        firstRecent > 0 && h('details', null, h('summary', null, t.older), selected(windows.slice(0, firstRecent))),
-        selected(windows.slice(firstRecent)),
-        ((focusedTurn && revealTurn) || pinnedSample)
+        largestGrowth
           && h(
             'div',
-            { className: 'context-window-actions' },
-            focusedTurn
-              && revealTurn
-              && h(ui.Button, { variant: 'ghost', onClick: () => revealTurn(focusedTurn.ref) }, counted('viewTurn', focusedTurn.number)),
-            pinnedSample && h(ui.Button, { variant: 'ghost', onClick: () => setPinned(undefined) }, t.latestWindow),
+            { className: 'context-window-growth' },
+            h('span', null, t.largestWindowGrowth),
+            h(
+              ui.Button,
+              { variant: 'ghost', onClick: () => (revealTurn ? revealTurn(largestGrowth.turn.ref) : choose(largestGrowth)) },
+              counted(revealTurn ? 'viewTurn' : 'turn', largestGrowth.turn.number),
+              ' · ',
+              fmt.signedTokens(largestGrowth.delta),
+            ),
           ),
+        firstRecent > 0 && h('details', null, h('summary', null, t.older), selected(windows.slice(0, firstRecent))),
+        selected(windows.slice(firstRecent)),
       ),
     report && breakdown && windowBreakdown(env, report, breakdown),
     compactions.length > 0 && compactionHistory(env, compactions, revealTurn),
@@ -984,25 +1038,26 @@ function requestHistory(env, steps, revealTurn, revealTool, pinned, setPinned) {
 
 function toolActivity(env, { total, failures, groups }) {
   const { h, t, fmt, counted } = env
-  const width = value => `${(100 * value) / total}%`
-  const toolRows = rows =>
+  const visible = groups.length > 4 ? groups.slice(0, 3) : groups
+  const rest = groups.slice(visible.length)
+  const restCalls = sum(rest.map(tool => tool.calls))
+  const restFailures = sum(rest.map(tool => tool.failed))
+  const segments = visible.map((tool, i) => ({ calls: tool.calls, color: chartColors[i] }))
+  if (rest.length) segments.push({ calls: restCalls, color: 'var(--faint)' })
+  const toolRows = (rows, grouped = false) =>
     h(
       'ul',
       { className: 'context-tool-rows' },
-      rows.map(tool => {
+      rows.map((tool, i) => {
         const duration = tool.longestMs >= 1000 ? t.longest(fmt.duration(tool.longestMs)) : ''
         const name = tool.name || t.unknownTool
         return h(
           'li',
           { key: tool.name },
+          h('i', { className: 'ui-chart-swatch', 'aria-hidden': true, style: { background: grouped ? 'var(--faint)' : chartColors[i] } }),
           h('bdi', { title: name }, name),
-          h(
-            'span',
-            { className: 'context-tool-track', 'aria-hidden': true },
-            h('i', { style: { width: width(tool.calls - tool.failed) } }),
-            tool.failed > 0 && h('i', { className: 'context-tool-failure', style: { width: width(tool.failed) } }),
-          ),
-          h('span', null, fmt.number(tool.calls)),
+          h('strong', null, counted('callCount', tool.calls)),
+          h('span', { className: 'context-tool-share' }, fmt.partPercent(tool.calls / total)),
           (tool.failed > 0 || duration)
             && h(
               'small',
@@ -1023,8 +1078,34 @@ function toolActivity(env, { total, failures, groups }) {
       h('h3', null, t.toolActivity),
       total > 0 && h('span', null, counted('calls', total), failures > 0 && ` · ${counted('failures', failures)}`),
     ),
-    total > 0 ? toolRows(groups.slice(0, 3)) : h('p', null, t.noCalls),
-    groups.length > 3 && h('details', null, h('summary', null, counted('more', groups.length - 3)), toolRows(groups.slice(3))),
+    total > 0
+      ? h(
+          env.fragment,
+          null,
+          h(
+            'div',
+            { className: 'context-tool-composition', 'aria-hidden': true },
+            segments.map(({ calls, color }) => h('span', { key: color, style: { width: `${(100 * calls) / total}%`, background: color } })),
+          ),
+          toolRows(visible),
+        )
+      : h('p', null, t.noCalls),
+    rest.length > 0
+      && h(
+        'details',
+        null,
+        h(
+          'summary',
+          null,
+          counted('more', rest.length),
+          ' · ',
+          counted('callCount', restCalls),
+          ' · ',
+          fmt.partPercent(restCalls / total),
+          restFailures > 0 && h('span', { className: 'context-tool-failed-count' }, ' · ', counted('failures', restFailures)),
+        ),
+        toolRows(rest, true),
+      ),
   )
 }
 
@@ -1139,50 +1220,102 @@ const styles = `
   :is(td, th):first-child { padding-inline-start: 0; text-align: start; }
   :is(td, th):last-child { padding-inline-end: 0; }
   thead { color: var(--muted); }
-  .context-tool-rows { display: grid; gap: var(--sp-6); margin: 0; padding: 0; list-style: none; }
+  .context-tool-composition {
+    display: flex;
+    height: var(--sp-12);
+    margin-block: var(--sp-8);
+    overflow: hidden;
+    border-radius: var(--r-full);
+  }
+  .context-tool-composition > span + span { box-shadow: inset 1px 0 var(--canvas); }
+  .context-tool-rows { margin: 0; padding: 0; list-style: none; }
   .context-tool-rows li {
     display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(2ch, auto);
-    gap: 0 var(--sp-12);
+    grid-template-columns: var(--sp-8) minmax(0, 1fr) auto minmax(6ch, auto);
     align-items: center;
+    gap: var(--sp-2) var(--sp-8);
+    padding-block: var(--sp-8);
     font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
   }
+  .context-tool-rows li + li { border-top: 1px solid var(--line); }
   .context-tool-rows bdi { overflow-wrap: anywhere; }
-  .context-tool-rows li > span:last-of-type { text-align: end; }
-  .context-tool-rows small { grid-column: 1 / -1; color: var(--muted); }
+  .context-tool-rows strong { font-weight: 600; }
+  .context-tool-share { color: var(--muted); text-align: end; }
+  .context-tool-rows small { grid-column: 2 / -1; color: var(--muted); font-size: inherit; }
   .context-tool-failed-count { color: var(--red); }
-  .context-tool-track { display: flex; height: var(--sp-4); overflow: hidden; border-radius: var(--r-full); background: var(--track); }
-  .context-tool-track i { background: var(--meter); }
-  .context-tool-track .context-tool-failure { background: var(--red); }
   .context-window-figure {
     display: grid;
     gap: var(--sp-8);
   }
   .context-window-figures {
     display: flex;
+    justify-content: flex-start;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-4) var(--sp-12);
+    gap: var(--sp-4) var(--sp-8);
     color: var(--muted);
     font-size: var(--fs-caption);
   }
   .context-window-figures strong {
     color: var(--ink);
-    font-size: var(--fs-title);
+    font-size: var(--fs-hero);
+    line-height: var(--lh-hero);
     font-weight: 600;
   }
+  .context-window-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--sp-8) var(--sp-12);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    overflow-wrap: anywhere;
+  }
+  .context-window-amounts dt, .context-window-amounts small {
+    color: var(--muted);
+    font-size: inherit;
+  }
+  .context-window-amounts dd {
+    margin-top: var(--sp-2);
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .context-window-amounts small { display: block; font-weight: 400; }
   .context-window-meter {
     display: block;
-    height: var(--sp-8);
+    height: var(--sp-12);
     overflow: hidden;
     border-radius: var(--r-full);
     background: var(--track);
   }
-  .context-window-meter > span {
+  .context-window-meter > span, .context-window-choice-meter > span {
     display: block;
     height: 100%;
-    background: var(--meter);
+    background: var(--chart-1);
+  }
+  .context-window-choice-meter {
+    grid-column: 1 / -1;
+    height: var(--sp-4);
+    margin-block: var(--sp-2);
+    border-radius: var(--r-full);
+    overflow: hidden;
+    background: var(--track);
+  }
+  .context-window-growth {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4) var(--sp-8);
+    margin-block: var(--sp-8);
+    color: var(--muted);
+    font-size: var(--fs-caption);
+  }
+  .context-window-growth .ui-button {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .window-plot-unit {
     padding-bottom: var(--sp-4);

@@ -2,8 +2,8 @@
   "formatVersion": 1,
   "id": "context-insights",
   "name": "上下文",
-  "version": "1.1.0",
-  "description": "查看模型请求的组成、上下文窗口占用与压缩记录。",
+  "version": "1.2.0",
+  "description": "查看上下文窗口用了多少、还剩多少，找出用量增长的轮次，了解各工具的调用次数。",
   "panels": [
     {
       "id": "insights",
